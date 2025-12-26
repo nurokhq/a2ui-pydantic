@@ -36,7 +36,7 @@ def get_pyproject_version() -> str:
     # Match version = "x.y.z" or version = 'x.y.z'
     match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
     if not match:
-        print("❌ Error: Could not find version in pyproject.toml")
+        print("❌ Error: Could not find version in pyproject.toml", file=sys.stderr)
         sys.exit(1)
 
     return match.group(1)
@@ -46,14 +46,17 @@ def get_init_version() -> str:
     """Extract version from a2ui_pydantic/__init__.py."""
     init_path = Path("a2ui_pydantic/__init__.py")
     if not init_path.exists():
-        print(f"❌ Error: {init_path} not found")
+        print(f"❌ Error: {init_path} not found", file=sys.stderr)
         sys.exit(1)
 
     content = init_path.read_text(encoding="utf-8")
     # Match __version__ = "x.y.z" or __version__ = 'x.y.z'
     match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', content)
     if not match:
-        print("❌ Error: Could not find __version__ in a2ui_pydantic/__init__.py")
+        print(
+            "❌ Error: Could not find __version__ in a2ui_pydantic/__init__.py",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     return match.group(1)
@@ -79,8 +82,8 @@ def check_readme_version(version: str):
 def main():
     """Main verification function."""
     if len(sys.argv) != 2:
-        print("Usage: python scripts/verify_version.py <tag_name>")
-        print("Example: python scripts/verify_version.py v0.1.0")
+        print("Usage: python scripts/verify_version.py <tag_name>", file=sys.stderr)
+        print("Example: python scripts/verify_version.py v0.1.0", file=sys.stderr)
         sys.exit(1)
 
     tag_name = sys.argv[1]
@@ -127,13 +130,13 @@ def main():
 
     # Report results
     if errors:
-        print("\n❌ Version verification failed:")
+        print("\n❌ Version verification failed:", file=sys.stderr)
         for error in errors:
-            print(f"   {error}")
-        print("\n💡 Please update the version in:")
-        print("   - pyproject.toml")
-        print("   - a2ui_pydantic/__init__.py")
-        print("   - README.md (if version is mentioned)")
+            print(f"   {error}", file=sys.stderr)
+        print("\n💡 Please update the version in:", file=sys.stderr)
+        print("   - pyproject.toml", file=sys.stderr)
+        print("   - a2ui_pydantic/__init__.py", file=sys.stderr)
+        print("   - README.md (if version is mentioned)", file=sys.stderr)
         sys.exit(1)
 
     print("\n✅ All version checks passed!")
