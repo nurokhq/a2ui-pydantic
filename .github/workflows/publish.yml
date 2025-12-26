@@ -1,0 +1,54 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for trusted publishing
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+
+      - name: Verify tag format
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          if [[ ! $TAG_NAME =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Tag must match format v*.*.* (e.g., v0.1.0), got: $TAG_NAME"
+            exit 1
+          fi
+          echo "✓ Tag format is valid: $TAG_NAME"
+
+      - name: Verify version consistency
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          uv run python scripts/verify_version.py "$TAG_NAME"
+
+      - name: Install build dependencies
+        run: uv pip install build
+
+      - name: Build package
+        run: uv run python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          print-hash: true
+
