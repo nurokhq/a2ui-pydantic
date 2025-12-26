@@ -40,11 +40,8 @@ jobs:
           TAG_NAME=${GITHUB_REF#refs/tags/}
           uv run python scripts/verify_version.py "$TAG_NAME"
 
-      - name: Install build tool
-        run: python -m pip install build
-
       - name: Build a binary wheel and a source tarball
-        run: python -m build
+        run: uv run python -m build
 
       - name: Store the distribution packages
         uses: actions/upload-artifact@v5
