@@ -26,6 +26,7 @@ from a2ui_pydantic.components import (
     VideoComponent,
 )
 from a2ui_pydantic.data_model import DataModelEntry
+from a2ui_pydantic.raw_schema import A2UI_SCHEMA as RAW_SCHEMA
 
 
 class Styles(BaseModel):
@@ -300,3 +301,8 @@ class A2UIMessage(BaseModel):
                 "'beginRendering', 'surfaceUpdate', 'dataModelUpdate', or 'deleteSurface'"
             )
         return self
+
+    @staticmethod
+    def raw_schema() -> str:
+        """Return the raw schema for the A2UI protocol."""
+        return RAW_SCHEMA
