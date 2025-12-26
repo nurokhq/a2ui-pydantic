@@ -1,0 +1,9 @@
+
+[MESSAGES CONTROL]
+# Disable too-few-public-methods warning
+# This is common for Pydantic models and data classes
+disable=too-few-public-methods
+
+[FORMAT]
+# Maximum number of characters on a single line
+max-line-length=100
