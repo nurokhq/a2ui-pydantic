@@ -29,10 +29,10 @@ def get_pyproject_version() -> str:
     """Extract version from pyproject.toml."""
     pyproject_path = Path("pyproject.toml")
     if not pyproject_path.exists():
-        print(f"❌ Error: {pyproject_path} not found")
+        print(f"❌ Error: {pyproject_path} not found", file=sys.stderr)
         sys.exit(1)
 
-    content = pyproject_path.read_text()
+    content = pyproject_path.read_text(encoding="utf-8")
     # Match version = "x.y.z" or version = 'x.y.z'
     match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
     if not match:
@@ -49,7 +49,7 @@ def get_init_version() -> str:
         print(f"❌ Error: {init_path} not found")
         sys.exit(1)
 
-    content = init_path.read_text()
+    content = init_path.read_text(encoding="utf-8")
     # Match __version__ = "x.y.z" or __version__ = 'x.y.z'
     match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', content)
     if not match:
@@ -59,19 +59,21 @@ def get_init_version() -> str:
     return match.group(1)
 
 
-def check_readme_version(version: str) -> bool:
+def check_readme_version(version: str):
     """Check if version appears in README.md (optional check)."""
     readme_path = Path("README.md")
     if not readme_path.exists():
-        return True  # README is optional
-
-    content = readme_path.read_text()
-    # Check if version appears anywhere in README
-    # This is a soft check - just warn if version is mentioned but doesn't match
+        return  # README is optional
+    content = readme_path.read_text(encoding="utf-8")
+    # This is a soft check. We just check for presence of the version string.
     if version in content or f"v{version}" in content:
-        return True
-    # If no version is mentioned, that's fine
-    return True
+        print("✅ README.md seems to contain the correct version.")
+    else:
+        # Warn if it's not present, as it might be an oversight.
+        print(
+            "⚠️  Warning: Current version not found in README.md. "
+            "Please check if it needs to be updated."
+        )
 
 
 def main():
@@ -98,24 +100,27 @@ def main():
     errors = []
     if tag_version != pyproject_version:
         errors.append(
-            f"❌ Tag version ({tag_version}) does not match pyproject.toml version ({pyproject_version})"
+            f"❌ Tag version ({tag_version}) does not match "
+            f"pyproject.toml version ({pyproject_version})"
         )
     else:
-        print(f"✅ Tag version matches pyproject.toml")
+        print("✅ Tag version matches pyproject.toml")
 
     if tag_version != init_version:
         errors.append(
-            f"❌ Tag version ({tag_version}) does not match __init__.py __version__ ({init_version})"
+            f"❌ Tag version ({tag_version}) does not match "
+            f"__init__.py __version__ ({init_version})"
         )
     else:
-        print(f"✅ Tag version matches __init__.py")
+        print("✅ Tag version matches __init__.py")
 
     if pyproject_version != init_version:
         errors.append(
-            f"❌ pyproject.toml version ({pyproject_version}) does not match __init__.py __version__ ({init_version})"
+            f"❌ pyproject.toml version ({pyproject_version}) does not match "
+            f"__init__.py __version__ ({init_version})"
         )
     else:
-        print(f"✅ pyproject.toml and __init__.py versions match")
+        print("✅ pyproject.toml and __init__.py versions match")
 
     # Check README (soft check)
     check_readme_version(tag_version)
@@ -137,4 +142,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
